@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS Zona (
+    codi INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL
+);
+insert:
+INSERT INTO Zona(nom) VALUES (?);
+select:
+SELECT * FROM Zona;
