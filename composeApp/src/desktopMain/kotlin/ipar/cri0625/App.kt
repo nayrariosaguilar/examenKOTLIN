@@ -61,7 +61,7 @@ fun App(sqlDriver: SqlDriver) {
             composable<ButacaRoute>{ ButacaScreen(database, controller) }
             composable<SessionRoute>{ SessionScreen(database, controller) }
             composable<PrecioRoute>{ PrecioScreen2(database, controller) }
-            composable<CompraRoute>{ CompraEntradaScreen(database, controller) }
+            composable<CompraRoute>{ CompraEntrada(database, controller) }
         }
 
     }
@@ -244,7 +244,7 @@ fun PrecioScreen2(db: Database, controller: NavController){
         Row {
             TextField(
                 value = sessio.value,
-                placeholder = { Text("Sessió") },
+                placeholder = { Text("Introduce la sessión") },
                 onValueChange = { sessio.value = it },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -252,14 +252,80 @@ fun PrecioScreen2(db: Database, controller: NavController){
         Row {
             TextField(
                 value = zona.value,
-                placeholder = { Text("Zona") },
+                placeholder = { Text("Introduce la zona") },
                 onValueChange = { zona.value = it },
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
         androidx.compose.material3.Button(
-            onClick = { result.value ="El precio calculado ${preus.value.preu}"
+            onClick = {
+                val sessioId = sessio.value.toLongOrNull()
+                val zonaId = zona.value.toLongOrNull()
+                if(sessioId!=null && zonaId != null){
+                    val preuEncontrado = preusdb.find { it.sessio==sessioId && it.zona==zonaId }
+                    result.value = "el precio es: $preuEncontrado"
+                }
+            },
+            modifier = Modifier.padding(vertical = 40.dp)
+        ) {
+            androidx.compose.material3.Text("go")
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        androidx.compose.material3.Text(text = result.value)
+    }
+}
+@Composable
+fun CompraEntrada(db: Database, controller: NavController){
+
+    val entradas = db.entradaQueries.select().executeAsList()
+    Column {
+        Nav(controller)
+        Text("ENTRADAS NO DISPONIBLES:")
+        Column {
+            LazyColumn {
+                items(entradas){ entrada ->
+                    Text(entrada.butaca.toString())
+                    Text(entrada.sessio.toString())
+                } }
+        }
+        val sessio = remember {
+            mutableStateOf("")
+        }
+        val butaca = remember { mutableStateOf("") }
+        val result = remember { mutableStateOf("") }
+        Row {
+            TextField(
+                value = sessio.value,
+                placeholder = { Text("Introduce la sessio") },
+                onValueChange = { sessio.value = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row {
+            TextField(
+                value = butaca.value,
+                placeholder = { Text("Introduce la butaca") },
+                onValueChange = { butaca.value = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        androidx.compose.material3.Button(
+            onClick = {
+                val sessioId = sessio.value.toLongOrNull()
+                val butacaId = butaca.value.toLongOrNull()
+                if(sessioId!=null && butacaId != null){
+
+                    val entrada = db.entradaQueries.insert(butacaId,sessioId)
+                    if(entrada!= null){
+                        result.value = "Felicidades has finalizado tu compra"
+                    }else{
+                        result.value = "Introduciste mal los datos"
+                    }
+
+                }
             },
             modifier = Modifier.padding(vertical = 40.dp)
         ) {
