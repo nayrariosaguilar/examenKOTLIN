@@ -31,7 +31,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
-
+import androidx.compose.ui.text.style.TextAlign
 import ipar.cri0625.data.Espectacle
 import kotlinx.serialization.Serializable
 import nayriosprojecte.composeapp.generated.resources.Res
@@ -105,28 +105,34 @@ fun EspectacleScreen(db: Database, controller: NavController){
     val espectacles = db.espectacleQueries.select().executeAsList()
     Column {
         Nav(controller)
-        Text("Detalles del espectaculo")
-        LazyColumn {
-
+        Text("DETALLES DE LOS ESPECTACULOS",modifier = Modifier.padding(all = 10.dp),style = MaterialTheme.typography.h2, textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text("NOMBRE DEL ESPECTACULO",modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.subtitle2, textAlign = TextAlign.Center)
+        LazyRow {
             items(espectacles){
-
                 espectacle ->
                 Row(
                     modifier = Modifier
                         .padding(4.dp)
                         .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
                         .padding(4.dp).fillMaxWidth()
+
                 ){
-                    Text("nombre")
-                    Text(espectacle.nom)
+                    Text(espectacle.nom,modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.button)
                 }
-                Row (
+            } }
+        Spacer(modifier = Modifier.width(16.dp))
+        Text("DESCRIPCION ESPECTACULO",modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.subtitle2, textAlign = TextAlign.Center)
+        LazyRow {
+            items(espectacles){
+                    espectacle ->
+                Row(
                     modifier = Modifier
                         .padding(4.dp)
                         .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
                         .padding(4.dp).fillMaxWidth()
                 ){
-                    Text(espectacle.description.toString())
+                    Text(espectacle.description.toString(),modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.button)
                 }
             } }
 
@@ -174,8 +180,16 @@ fun SessionScreen(db: Database, controller: NavController){
 }
 
 @Composable
-fun PrecioScreen(db: Database, controller: NavController){
+fun PrecioScreen(db: Database, controller: NavController, route: PrecioRoute){
+
+    TextField(
+        value = route.value,
+        placeholder = { Text("City Name") },
+        onValueChange = { route.value = it }
+    )
+
     val preus = db.preuQueries.select().executeAsList()
+
     Column {
         Nav(controller)
         LazyColumn {
@@ -239,7 +253,6 @@ fun Nav(controller: NavController){
 fun HomeScreen(controller: NavController){
     Column{
         Nav(controller)
-        Text("Espectaculos")
         Button(onClick = {controller.navigate(EspectacleRoute)}){
             Text("ListarEspectaculos")
         }

@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS Preu (
 );
 insert:
 INSERT INTO Preu(preu,sessio, zona) VALUES (?,?,?);
+
 select:
 SELECT * FROM Preu;
