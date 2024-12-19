@@ -33,6 +33,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import ipar.cri0625.data.Espectacle
+import ipar.cri0625.data.Preu
+import jdk.internal.misc.Signal.handle
 import kotlinx.serialization.Serializable
 import nayriosprojecte.composeapp.generated.resources.Res
 import nayriosprojecte.composeapp.generated.resources.compose_multiplatform
@@ -58,7 +60,7 @@ fun App(sqlDriver: SqlDriver) {
             composable<ZonaRoute>{ ZonaScreen(database, controller) }
             composable<ButacaRoute>{ ButacaScreen(database, controller) }
             composable<SessionRoute>{ SessionScreen(database, controller) }
-            composable<PrecioRoute>{ PrecioScreen(database, controller) }
+            composable<PrecioRoute>{ PrecioScreen2(database, controller) }
             composable<CompraRoute>{ CompraEntradaScreen(database, controller) }
         }
 
@@ -180,13 +182,7 @@ fun SessionScreen(db: Database, controller: NavController){
 }
 
 @Composable
-fun PrecioScreen(db: Database, controller: NavController, route: PrecioRoute){
-
-    TextField(
-        value = route.value,
-        placeholder = { Text("City Name") },
-        onValueChange = { route.value = it }
-    )
+fun PrecioScreen(db: Database, controller: NavController){
 
     val preus = db.preuQueries.select().executeAsList()
 
@@ -233,6 +229,45 @@ fun CompraEntradaScreen(db: Database, controller: NavController){
                 Text("La zona assignada es: ")
                 Text(zona.nom)
             } }
+    }
+}
+@Composable
+fun PrecioScreen2(db: Database, controller: NavController){
+    val preusdb = db.preuQueries.select().executeAsList()
+    Column {
+        Nav(controller)
+        val sessio = remember {
+            mutableStateOf("")
+        }
+        val zona = remember { mutableStateOf("") }
+        val result = remember { mutableStateOf("") }
+        Row {
+            TextField(
+                value = sessio.value,
+                placeholder = { Text("Sessió") },
+                onValueChange = { sessio.value = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        Row {
+            TextField(
+                value = zona.value,
+                placeholder = { Text("Zona") },
+                onValueChange = { zona.value = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        androidx.compose.material3.Button(
+            onClick = { result.value ="El precio calculado ${preus.value.preu}"
+            },
+            modifier = Modifier.padding(vertical = 40.dp)
+        ) {
+            androidx.compose.material3.Text("go")
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        androidx.compose.material3.Text(text = result.value)
     }
 }
 
