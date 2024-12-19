@@ -2,9 +2,11 @@ package ipar.cri0625
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,6 +28,9 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 
 import ipar.cri0625.data.Espectacle
 import kotlinx.serialization.Serializable
@@ -53,6 +58,8 @@ fun App(sqlDriver: SqlDriver) {
             composable<ZonaRoute>{ ZonaScreen(database, controller) }
             composable<ButacaRoute>{ ButacaScreen(database, controller) }
             composable<SessionRoute>{ SessionScreen(database, controller) }
+            composable<PrecioRoute>{ PrecioScreen(database, controller) }
+            composable<CompraRoute>{ CompraEntradaScreen(database, controller) }
         }
 
     }
@@ -68,17 +75,29 @@ object ZonaRoute
 object ButacaRoute
 @Serializable
 object SessionRoute
+@Serializable
+object PrecioRoute
+@Serializable
+object CompraRoute
+
 
 
 
 fun insertDatabase(db: Database){
-    //CREACIÓN DE TODOS LOS INSERTS CON ORDEN DE CREACIÓN
-   db.espectacleQueries.insert("Gran espectacle","descripcion")
+    //CREACIÓN DE TODOS LOS INSERTS CON ORDEN DE CREACIÓN para 1 espectaculo
+   db.espectacleQueries.insert("Gran espectacle","Espectaculo bla bla bla")
    db.sessionQueries.insert(12,1)
    db.preuQueries.insert("12.99",1,1)
     db.zonaQueries.insert("zona1")
     db.butacaQueries.insert(1)
     db.entradaQueries.insert(1,1)
+    //espectaculo2
+    db.espectacleQueries.insert("Gran espectacle2","Espectaculo bla bla bla")
+    db.sessionQueries.insert(13,2)
+    db.zonaQueries.insert("zona1")
+    db.preuQueries.insert("12.99",1,2)
+    db.butacaQueries.insert(2)
+    db.entradaQueries.insert(2,2)
 }
 
 @Composable
@@ -86,10 +105,29 @@ fun EspectacleScreen(db: Database, controller: NavController){
     val espectacles = db.espectacleQueries.select().executeAsList()
     Column {
         Nav(controller)
+        Text("Detalles del espectaculo")
         LazyColumn {
-            items(espectacles){ espectacle ->
-                Text(espectacle.nom)
-                Text(espectacle.description.toString())
+
+            items(espectacles){
+
+                espectacle ->
+                Row(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
+                        .padding(4.dp).fillMaxWidth()
+                ){
+                    Text("nombre")
+                    Text(espectacle.nom)
+                }
+                Row (
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
+                        .padding(4.dp).fillMaxWidth()
+                ){
+                    Text(espectacle.description.toString())
+                }
             } }
 
     }
@@ -100,11 +138,13 @@ fun ZonaScreen(db: Database, controller: NavController){
     val zonas = db.zonaQueries.select().executeAsList()
     Column {
         Nav(controller)
-        LazyColumn {
-            items(zonas){ zona ->
-                Text(zona.nom)
-            } }
-
+       Text("ZONAS")
+            LazyColumn {
+                items(zonas) { zona ->
+                    Text("La zona assignada es: ")
+                    Text(zona.nom)
+                }
+            }
     }
 }
 @Composable
@@ -114,8 +154,8 @@ fun ButacaScreen(db: Database, controller: NavController){
         Nav(controller)
         LazyColumn {
             items(butacas){ butaca ->
-                Text("La zona assignada es: ")
-                Text(butaca.zona.toString())
+                Text("La numero de butaca es: ")
+                Text(butaca.numero.toString())
             } }
 
     }
@@ -127,10 +167,58 @@ fun SessionScreen(db: Database, controller: NavController){
         Nav(controller)
         LazyColumn {
             items(sessions){ session ->
-               Text("el codigo del espectaculo es: ")
-                Text(session.codi.toString())
+               Text("el dia de la session es: ")
+                Text(session.dia.toString())
             } }
+    }
+}
 
+@Composable
+fun PrecioScreen(db: Database, controller: NavController){
+    val preus = db.preuQueries.select().executeAsList()
+    Column {
+        Nav(controller)
+        LazyColumn {
+            items(preus){ preu ->
+                Text("el precio de tu espectaculo es: ")
+                Text(preu.preu)
+            } }
+    }
+}
+
+@Composable
+fun CompraEntradaScreen(db: Database, controller: NavController){
+    val zonas = db.zonaQueries.select().executeAsList()
+    val espectacles= db.espectacleQueries.select().executeAsList()
+    val preus = db.preuQueries.select().executeAsList()
+    //AQUI PONDRE LA INFORMACIÓN DE LA ENTRADA
+    val entradas = db.entradaQueries.select().executeAsList()
+
+    Column {
+        Nav(controller)
+        LazyColumn {
+            items(entradas){ entrada ->
+                Text("La numero de TU butaca es: ")
+                Text(entrada.butaca.toString())
+                Text("La numero de TU session es: ")
+                Text(entrada.sessio.toString())
+            } }
+        LazyColumn {
+            items(espectacles){ espectacle ->
+                Text("Detalles del espectaculo ")
+                Text(espectacle.nom)
+                Text(espectacle.description.toString())
+            } }
+        LazyColumn {
+            items(preus){ preu ->
+                Text("el precio de tu espectaculo es: ")
+                Text(preu.preu)
+            } }
+        LazyColumn {
+            items(zonas){ zona ->
+                Text("La zona assignada es: ")
+                Text(zona.nom)
+            } }
     }
 }
 
@@ -146,6 +234,7 @@ fun Nav(controller: NavController){
         }
     )
 }
+
 @Composable
 fun HomeScreen(controller: NavController){
     Column{
@@ -154,14 +243,21 @@ fun HomeScreen(controller: NavController){
         Button(onClick = {controller.navigate(EspectacleRoute)}){
             Text("ListarEspectaculos")
         }
-        Button(onClick = {controller.navigate(EspectacleRoute)}){
+        Button(onClick = {controller.navigate(ZonaRoute)}){
             Text("ListarZona")
         }
-        Button(onClick = {controller.navigate(EspectacleRoute)}){
+        Button(onClick = {controller.navigate(ButacaRoute)}){
             Text("ListarButaca")
         }
-        Button(onClick = {controller.navigate(EspectacleRoute)}){
+        Button(onClick = {controller.navigate(SessionRoute)}){
             Text("ListarSession")
         }
+        Button(onClick = {controller.navigate(PrecioRoute)}){
+            Text("Descubre tu precio")
+        }
+        Button(onClick = {controller.navigate(CompraRoute)}){
+            Text("Descubre los detalles de toda tu compra")
+        }
+
     }
 }
