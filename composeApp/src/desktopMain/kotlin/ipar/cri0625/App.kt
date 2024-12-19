@@ -282,6 +282,7 @@ fun PrecioScreen2(db: Database, controller: NavController){
 fun CompraEntrada(db: Database, controller: NavController){
 
     val entradas = db.entradaQueries.select().executeAsList()
+
     Column {
         Nav(controller)
 
@@ -342,10 +343,9 @@ fun CompraEntrada(db: Database, controller: NavController){
                 val sessioId = sessio.value.toLongOrNull()
                 val butacaId = butaca.value.toLongOrNull()
                 if(sessioId!=null && butacaId != null){
-
+                   // val butacaId= db.butacaQueries.insert(zonaId) algo de la zxona porque no lo inserta bien
                     val entrada = db.entradaQueries.insert(butacaId,sessioId)
                     if(entrada!= null){
-
                         result.value = "Felicidades has finalizado tu compra"
                     }else{
                         result.value = "Introduciste mal los datos"
