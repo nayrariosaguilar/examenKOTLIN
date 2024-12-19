@@ -206,6 +206,8 @@ fun CompraEntradaScreen(db: Database, controller: NavController){
 
     Column {
         Nav(controller)
+
+
         LazyColumn {
             items(entradas){ entrada ->
                 Text("La numero de TU butaca es: ")
@@ -282,14 +284,37 @@ fun CompraEntrada(db: Database, controller: NavController){
     val entradas = db.entradaQueries.select().executeAsList()
     Column {
         Nav(controller)
+
         Text("ENTRADAS NO DISPONIBLES:")
-        Column {
-            LazyColumn {
-                items(entradas){ entrada ->
-                    Text(entrada.butaca.toString())
-                    Text(entrada.sessio.toString())
-                } }
-        }
+        Text("Butacas NO DISPONIBLES")
+        LazyRow {
+            items(entradas){
+                    entrada ->
+                Row(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
+                        .padding(4.dp).fillMaxWidth()
+
+                ){
+                    Text(entrada.butaca.toString(),modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.button)
+                }
+            } }
+        Text("Sesiones no disponibles")
+        LazyRow {
+            items(entradas){
+                    entrada ->
+                Row(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .border(1.dp, color = MaterialTheme.colors.primary, CircleShape)
+                        .padding(4.dp).fillMaxWidth()
+                ){
+                    Text(entrada.sessio.toString(),modifier = Modifier.padding(all = 4.dp),style = MaterialTheme.typography.button)
+                }
+            } }
+
+
         val sessio = remember {
             mutableStateOf("")
         }
@@ -320,6 +345,7 @@ fun CompraEntrada(db: Database, controller: NavController){
 
                     val entrada = db.entradaQueries.insert(butacaId,sessioId)
                     if(entrada!= null){
+
                         result.value = "Felicidades has finalizado tu compra"
                     }else{
                         result.value = "Introduciste mal los datos"
