@@ -194,13 +194,13 @@ fun URlList(database: MongoDatabase) {
     LaunchedEffect(isLoading) {
         if (isLoading) {
             urls =
-                database.getCollection<URL>( "products").find<URL>().toList()
+                database.getCollection<URL>( "Urls").find<URL>().toList()
             isLoading = false
         }
     }
     Column {
 
-        Text("Products")
+        Text("URLS")
         //Spacer(modifier = Modifier.height(20.dp))
         if (isLoading) {
             CircularProgressIndicator()
@@ -229,7 +229,6 @@ fun UrlInsert(database: MongoDatabase, controller: NavController) {
             insert = false
         }
     }
-
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
