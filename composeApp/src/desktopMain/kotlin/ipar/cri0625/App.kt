@@ -32,12 +32,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import com.mongodb.MongoException
+import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import ipar.cri0625.data.Espectacle
 import ipar.cri0625.data.Preu
 import jdk.internal.misc.Signal.handle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import nayriosprojecte.composeapp.generated.resources.Res
 import nayriosprojecte.composeapp.generated.resources.compose_multiplatform
+import org.bson.BsonInt64
 
 object DatabaseConfig {
     val name: String = "granTeatre.db"
@@ -46,22 +52,36 @@ object DatabaseConfig {
 @Composable
 @Preview
 fun App(sqlDriver: SqlDriver) {
-    val database = Database(sqlDriver)
+    val databaseSqlite = Database(sqlDriver)
     Database.Schema.create(sqlDriver)
 
+    var database: MongoDatabase? by remember { mutableStateOf(null) }
+    var error: String? by remember { mutableStateOf(null) }
+
     if(DatabaseConfig.development){
-       insertDatabase(database)
+       insertDatabase(databaseSqlite)
+    }
+
+    DisposableEffect(Unit) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val connectionString = "mongodb+srv://nayrios2004:Adri888@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
+                database = setupConnection(connectionString, "test")
+            } catch (me: MongoException) {
+                error = me.message
+            }
+        }
+        onDispose { }
     }
     MaterialTheme {
         val controller = rememberNavController()
         NavHost(controller, startDestination = HomeRoute){
             composable<HomeRoute>{ HomeScreen(controller) }
-            composable<EspectacleRoute>{ EspectacleScreen(database, controller) }
-            composable<ZonaRoute>{ ZonaScreen(database, controller) }
-            composable<ButacaRoute>{ ButacaScreen(database, controller) }
-            composable<SessionRoute>{ SessionScreen(database, controller) }
-            composable<PrecioRoute>{ PrecioScreen2(database, controller) }
-            composable<CompraRoute>{ CompraEntrada(database, controller) }
+            //insertar
+            composable<EspectacleRoute>{ EspectacleScreen(databaseSqlite, controller) }
+            //select
+
+
         }
 
     }
@@ -155,6 +175,21 @@ fun ZonaScreen(db: Database, controller: NavController){
             }
     }
 }
+//CONEXION
+suspend fun setupConnection(connectionString: String, databaseName: String): MongoDatabase {
+    val client = MongoClient.create(connectionString)
+    val database: MongoDatabase = client.getDatabase(databaseName)
+    val command = Document("ping", BsonInt64(1))
+    try {
+        database.runCommand(command)
+        println("Connected to database")
+    } catch (e: Exception) {
+        println("Error connecting to database")
+        throw e
+    }
+    return database
+}
+//INSERTA VER URLS
 @Composable
 fun ButacaScreen(db: Database, controller: NavController){
     val butacas = db.butacaQueries.select().executeAsList()

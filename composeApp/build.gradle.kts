@@ -15,6 +15,11 @@ kotlin {
         val desktopMain by getting
         
         commonMain.dependencies {
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            implementation("org.slf4j:slf4j-nop:1.7.36")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+            implementation("org.mongodb:mongodb-driver-kotlin-coroutine:5.3.0")
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
