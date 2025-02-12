@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS Login (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user TEXT UNIQUE,
+    psswd TEXT UNIQUE
+
+);
+insert:
+INSERT INTO Login(user, psswd) VALUES (?,?);
+select:
+SELECT * FROM Login;

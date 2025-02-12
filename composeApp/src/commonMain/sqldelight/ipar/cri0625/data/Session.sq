@@ -1,9 +1,0 @@
-CREATE TABLE IF NOT EXISTS Session (
-    dia INTEGER PRIMARY KEY,
-    codi INTEGER,
-    FOREIGN KEY(codi) REFERENCES Espectacle(codi)
-);
-insert:
-INSERT INTO Session(dia, codi) VALUES (?,?);
-select:
-SELECT * FROM Session;
