@@ -40,6 +40,7 @@ import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import jdk.internal.misc.Signal.handle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import nayriosprojecte.composeapp.generated.resources.Res
@@ -69,7 +70,7 @@ fun App(sqlDriver: SqlDriver) {
 
     DisposableEffect(Unit) {
         CoroutineScope(Dispatchers.Default).launch {
-            val isValidUser = validateUser(databaseSqlite, user, psswd)
+          //  val isValidUser = validateUser(databaseSqlite, user, psswd)
             try {
                 val connectionString = "mongodb+srv://$user:$psswd@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
                 database = setupConnection(connectionString, "test")
@@ -166,14 +167,43 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
     }
 
 
+//@Composable
+//fun LoginScreen(controller: NavController,db: Database ){
+//    val result = db.loginQueries.select(username).executeAsOneOrNull()
+//    Column {
+//        Nav(controller)
+//        Button(onClick = {controller.navigate(Login)}){
+//            Text("ListarEspectaculos")
+//        }
+//    }
+//
+//}
+/**Metodo para mostrar las urls**/
 @Composable
-fun LoginScreen(controller: NavController,db: Database ){
-    val result = db.loginQueries.select(username).executeAsOneOrNull()
-    Column {
-        Nav(controller)
-        Button(onClick = {controller.navigate(Login)}){
-            Text("ListarEspectaculos")
+fun URlList(database: MongoDatabase) {
+
+    var isLoading by remember { mutableStateOf(true) }
+    var urls by remember { mutableStateOf(listOf<URL>()) }
+
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            urls =
+                database.getCollection<URL>( "products").find<URL>().toList()
+            isLoading = false
         }
     }
+    Column {
 
+        Text("Products")
+        //Spacer(modifier = Modifier.height(20.dp))
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            LazyColumn {
+                items(urls) { product ->
+                    Text(product.url)
+                }
+            }
+        }
+    }
 }
