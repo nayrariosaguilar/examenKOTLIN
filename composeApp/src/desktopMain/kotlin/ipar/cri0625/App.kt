@@ -96,10 +96,6 @@ fun App(sqlDriver: SqlDriver) {
     }
 }
 
-suspend fun logout(db: Database){
-    //db.close
-}
-
 @Serializable
 object HomeRoute
 @Serializable
@@ -114,6 +110,7 @@ object VerURL
 object borrarURL
 @Serializable
 object Deslogin
+
 
 fun loginUser(db: Database){
     db.loginQueries.insert("nayrios2004", "Adri888")
@@ -159,11 +156,10 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
      Button(onClick = {controller.navigate(Login)}){
           Text("Login APP urls")
             }
-            Button(onClick = {controller.navigate(Deslogin)}){
-                Text("Deslogin APP urls")
-            }
+
         }
     }
+
 
 @Composable
 fun InsideScreen(controller: NavController, database: MongoDatabase) {
@@ -176,10 +172,11 @@ fun InsideScreen(controller: NavController, database: MongoDatabase) {
         Button(onClick = { controller.navigate(VerURL) }) {
             Text("Ver URL's")
         }
-        Button(onClick = { controller.navigate(borrarURL) }) {
-            Text("Borrar URL")
+        Button(onClick = { controller.navigate(Deslogin) }) {
+            Text("Deslogin")
         }
-
+        //BORRAR lo de la base de datos local, cuando compruebo al incio veo que no hay nada me lo permite
+        //dejar datos por defecto en la interfaz
 
     }
 }
@@ -302,4 +299,43 @@ fun LoginScreen(controller: NavController, db: Database) {
         }
     }
 }
+//
+@Composable
+fun LogoutScreen(controller: NavController, database: MongoDatabase) {
+    var dropBD by remember { mutableStateOf(false) }
+    var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
+    var loginError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(dropBD) {
+        if (dropBD) {
+             dropBD = .getCollection<>()
+            url = URL(id = ObjectId(), url = "")
+            insert = false
+        }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp)
+    ) {
+        if (insert) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = "URL",
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            TextField(
+                value = url.url,
+                onValueChange = { url = url.copy(url = it) },
+                label = { Text("Name") },
+                placeholder = { Text("URL") },)
+        }
+        Button(onClick = { insert = true}) { Text("Insert") }
+    }
+}
+
 
