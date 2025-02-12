@@ -64,14 +64,14 @@ fun App(sqlDriver: SqlDriver) {
         loginUser(databaseSqlite)
     }
 
-    val username = "nayrios2004"
-    val password = "Adri888"
+    val user = "nayrios2004"
+    val psswd = "Adri888"
 
     DisposableEffect(Unit) {
         CoroutineScope(Dispatchers.Default).launch {
-            val isValidUser = validateUser(databaseSqlite, username, password)
+            val isValidUser = validateUser(databaseSqlite, user, psswd)
             try {
-                val connectionString = "mongodb+srv://:Adri888@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
+                val connectionString = "mongodb+srv://$user:$psswd@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
                 database = setupConnection(connectionString, "test")
             } catch (me: MongoException) {
                 error = me.message
@@ -83,7 +83,7 @@ fun App(sqlDriver: SqlDriver) {
         val controller = rememberNavController()
         NavHost(controller, startDestination = HomeRoute){
             composable<HomeRoute>{ HomeScreen(controller) }
-
+            composable<Login>{LoginScreen(controller,databaseSqlite)}
 
         }
 
@@ -106,18 +106,12 @@ object VerURL
 fun loginUser(db: Database){
     db.loginQueries.insert("nayrios2004", "Adri888")
 }
-
-fun validateUser(db: Database, username: String, password: String): Boolean {
-    val result = db.loginQueries.select(username).executeAsOneOrNull()
-    return result != null && result.password == password
-}
-
 data class URL(
     @BsonId
     val id: ObjectId,
     val url: String
 )
-//CONEXION
+
 suspend fun setupConnection(connectionString: String, databaseName: String): MongoDatabase {
     val client = MongoClient.create(connectionString)
     val database: MongoDatabase = client.getDatabase(databaseName)
@@ -149,9 +143,9 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
     fun HomeScreen(controller: NavController) {
         Column {
             Nav(controller)
-//        Button(onClick = {controller.navigate(EspectacleRoute)}){
-//            Text("ListarEspectaculos")
-//        }
+      Button(onClick = {controller.navigate(Login)}){
+           Text("ListarEspectaculos")
+       }
 //        Button(onClick = {controller.navigate(ZonaRoute)}){
 //            Text("ListarZona")
 //        }
@@ -170,3 +164,16 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
 
         }
     }
+
+
+@Composable
+fun LoginScreen(controller: NavController,db: Database ){
+    val result = db.loginQueries.select(username).executeAsOneOrNull()
+    Column {
+        Nav(controller)
+        Button(onClick = {controller.navigate(Login)}){
+            Text("ListarEspectaculos")
+        }
+    }
+
+}
