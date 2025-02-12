@@ -308,33 +308,20 @@ fun LogoutScreen(controller: NavController, database: MongoDatabase) {
 
     LaunchedEffect(dropBD) {
         if (dropBD) {
-             dropBD = .getCollection<>()
+             dropBD = database.getCollection<>()
             url = URL(id = ObjectId(), url = "")
-            insert = false
+            dropBD = false
         }
     }
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize().padding(10.dp)
     ) {
-        if (insert) {
+        if (dropBD) {
             CircularProgressIndicator()
-        } else {
-            Text(
-                text = "URL",
-                style = MaterialTheme.typography.h3,
-                color = MaterialTheme.colors.primary
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            TextField(
-                value = url.url,
-                onValueChange = { url = url.copy(url = it) },
-                label = { Text("Name") },
-                placeholder = { Text("URL") },)
         }
-        Button(onClick = { insert = true}) { Text("Insert") }
+        Button(onClick = { dropBD = true}) { Text("Insert") }
     }
 }
 
