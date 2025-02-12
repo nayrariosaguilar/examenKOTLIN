@@ -78,8 +78,6 @@ fun App(sqlDriver: SqlDriver) {
                 } catch (me: MongoException) {
                     error = me.message
                 }
-            }else{
-
             }
 
         }
@@ -92,8 +90,7 @@ fun App(sqlDriver: SqlDriver) {
             composable<Login>{LoginScreen(controller,databaseSqlite)}
             composable<Adentro>{InsideScreen(controller,database!!)}
             composable<AñadirURL>{UrlInsert(database!!, controller)}
-            composable<VerURL>{URlList(database!!)}
-
+            composable<VerURL>{URlList(database!!,controller)}
         }
 
     }
@@ -113,12 +110,15 @@ object Login
 object AñadirURL
 @Serializable
 object VerURL
+@Serializable
+object borrarURL
+@Serializable
+object Deslogin
 
 fun loginUser(db: Database){
     db.loginQueries.insert("nayrios2004", "Adri888")
 }
 
-//valida
 data class URL(
     @BsonId
     val id: ObjectId,
@@ -157,10 +157,11 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
         Column {
             Nav(controller)
      Button(onClick = {controller.navigate(Login)}){
-          Text("ListarEspectaculos")
-       }
-
-
+          Text("Login APP urls")
+            }
+            Button(onClick = {controller.navigate(Deslogin)}){
+                Text("Deslogin APP urls")
+            }
         }
     }
 
@@ -170,11 +171,15 @@ fun InsideScreen(controller: NavController, database: MongoDatabase) {
         Nav(controller)
 
         Button(onClick = { controller.navigate(AñadirURL) }) {
-            Text("Insertar Producto")
+            Text("Insertar URL")
         }
         Button(onClick = { controller.navigate(VerURL) }) {
-            Text("Ver Productos")
+            Text("Ver URL's")
         }
+        Button(onClick = { controller.navigate(borrarURL) }) {
+            Text("Borrar URL")
+        }
+
 
     }
 }
@@ -187,7 +192,8 @@ fun validateUser(database: Database, username: String, password: String): Boolea
 
 /**Metodo para mostrar las urls**/
 @Composable
-fun URlList(database: MongoDatabase) {
+fun URlList(database: MongoDatabase,controller: NavController) {
+    Nav(controller)
     var isLoading by remember { mutableStateOf(true) }
     var urls by remember { mutableStateOf(listOf<URL>()) }
 
@@ -206,8 +212,8 @@ fun URlList(database: MongoDatabase) {
             CircularProgressIndicator()
         } else {
             LazyColumn {
-                items(urls) { product ->
-                    Text(product.url)
+                items(urls) { url ->
+                    Text(url.url)
                 }
             }
         }
@@ -239,7 +245,7 @@ fun UrlInsert(database: MongoDatabase, controller: NavController) {
             CircularProgressIndicator()
         } else {
             Text(
-                text = "Product",
+                text = "URL",
                 style = MaterialTheme.typography.h3,
                 color = MaterialTheme.colors.primary
             )
@@ -248,11 +254,12 @@ fun UrlInsert(database: MongoDatabase, controller: NavController) {
                 value = url.url,
                 onValueChange = { url = url.copy(url = it) },
                 label = { Text("Name") },
-                placeholder = { Text("Product name") },)
+                placeholder = { Text("URL") },)
         }
         Button(onClick = { insert = true}) { Text("Insert") }
     }
 }
+
 @Composable
 fun LoginScreen(controller: NavController, db: Database) {
     var username by remember { mutableStateOf("") }
