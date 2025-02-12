@@ -301,14 +301,14 @@ fun LoginScreen(controller: NavController, db: Database) {
 }
 //
 @Composable
-fun LogoutScreen(controller: NavController, database: MongoDatabase) {
+fun LogoutScreen(controller: NavController, database: Database) {
     var dropBD by remember { mutableStateOf(false) }
     var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
     var loginError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(dropBD) {
         if (dropBD) {
-             dropBD = database.getCollection<>()
+             dropBD = database.loginQueries.
             url = URL(id = ObjectId(), url = "")
             dropBD = false
         }

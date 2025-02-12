@@ -8,3 +8,6 @@ insert:
 INSERT INTO Login(user, psswd) VALUES (?,?);
 select:
 SELECT * FROM Login WHERE user = ?;
+
+delete:
+DELETE * FROM Login;
