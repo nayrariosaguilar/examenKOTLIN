@@ -308,7 +308,7 @@ fun LogoutScreen(controller: NavController, database: Database) {
 
     LaunchedEffect(dropBD) {
         if (dropBD) {
-             dropBD = database.loginQueries.
+             dropBD = database.loginQueries.delete()
             url = URL(id = ObjectId(), url = "")
             dropBD = false
         }
