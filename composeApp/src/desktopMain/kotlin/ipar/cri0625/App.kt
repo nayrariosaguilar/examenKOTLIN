@@ -86,6 +86,7 @@ fun App(sqlDriver: SqlDriver) {
             composable<HomeRoute>{ HomeScreen(controller) }
             composable<Login>{LoginScreen(controller,databaseSqlite)}
 
+
         }
 
     }
@@ -144,44 +145,34 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
     fun HomeScreen(controller: NavController) {
         Column {
             Nav(controller)
-      Button(onClick = {controller.navigate(Login)}){
-           Text("ListarEspectaculos")
+     Button(onClick = {controller.navigate(Login)}){
+          Text("ListarEspectaculos")
        }
-//        Button(onClick = {controller.navigate(ZonaRoute)}){
-//            Text("ListarZona")
-//        }
-//        Button(onClick = {controller.navigate(ButacaRoute)}){
-//            Text("ListarButaca")
-//        }
-//        Button(onClick = {controller.navigate(SessionRoute)}){
-//            Text("ListarSession")
-//        }
-//        Button(onClick = {controller.navigate(PrecioRoute)}){
-//            Text("Descubre tu precio")
-//        }
-//        Button(onClick = {controller.navigate(CompraRoute)}){
-//            Text("Descubre los detalles de toda tu compra")
-//        }
+            Button(onClick = { controller.navigate(AñadirURL) }) {
+                Text("Insertar Producto")
+            }
+            Button(onClick = { controller.navigate(VerURL) }) {
+                Text("Ver Productos")
+            }
 
         }
     }
 
 
-//@Composable
-//fun LoginScreen(controller: NavController,db: Database ){
-//    val result = db.loginQueries.select(username).executeAsOneOrNull()
-//    Column {
-//        Nav(controller)
-//        Button(onClick = {controller.navigate(Login)}){
-//            Text("ListarEspectaculos")
-//        }
-//    }
-//
-//}
+@Composable
+fun LoginScreen(controller: NavController,db: Database ){
+    val result = db.loginQueries.select(username).executeAsOneOrNull()
+   Column {
+        Nav(controller)
+        Button(onClick = {controller.navigate(Login)}){
+            Text("ListarEspectaculos")
+        }
+    }
+
+}
 /**Metodo para mostrar las urls**/
 @Composable
 fun URlList(database: MongoDatabase) {
-
     var isLoading by remember { mutableStateOf(true) }
     var urls by remember { mutableStateOf(listOf<URL>()) }
 
@@ -207,3 +198,44 @@ fun URlList(database: MongoDatabase) {
         }
     }
 }
+//
+@Composable
+fun ProductInsert(database: MongoDatabase) {
+
+    var insert by remember { mutableStateOf(false) }
+    var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
+
+
+    LaunchedEffect(insert) {
+        if (insert) {
+            database.getCollection<URL>("Urls").insertOne(url)
+            url = URL(id = ObjectId(), url = "")
+            insert = false
+        }
+    }
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp)
+    ) {
+        if (insert) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = "Product",
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            TextField(
+                value = url.url,
+                onValueChange = { url = url.copy(url = it) },
+                label = { Text("Name") },
+                placeholder = { Text("Product name") },)
+        }
+    }
+}
+//modifier = Modifier.fillMaxWidth()
+
