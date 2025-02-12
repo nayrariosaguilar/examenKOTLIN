@@ -159,17 +159,11 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
     }
 
 
-@Composable
-fun LoginScreen(controller: NavController,db: Database ){
-    val result = db.loginQueries.select(username).executeAsOneOrNull()
-   Column {
-        Nav(controller)
-        Button(onClick = {controller.navigate(Login)}){
-            Text("ListarEspectaculos")
-        }
-    }
-
+fun validateUser(database: Database, username: String, password: String): Boolean {
+    val user = database.loginQueries.select(username).executeAsOneOrNull()
+    return user != null && user.psswd == password
 }
+
 /**Metodo para mostrar las urls**/
 @Composable
 fun URlList(database: MongoDatabase) {
@@ -237,5 +231,46 @@ fun ProductInsert(database: MongoDatabase) {
         }
     }
 }
-//modifier = Modifier.fillMaxWidth()
+@Composable
+fun LoginScreen(controller: NavController, db: Database) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf<String?>(null) }
+
+    Column(
+
+    ) {
+        Text("Login", style = MaterialTheme.typography.h4)
+
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Usuario") }
+        )
+
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                if (validateUser(db, username, password)) {
+                   // controller.navigate(HomeRoute)
+                } else {
+                    loginError = "Usuario o contraseña incorrectos"
+                }
+            }
+        ) {
+            Text("Iniciar sesión")
+        }
+
+        loginError?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MaterialTheme.colors.error)
+        }
+    }
+}
 

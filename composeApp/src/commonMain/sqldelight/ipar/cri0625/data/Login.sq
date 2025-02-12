@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS Login (
 insert:
 INSERT INTO Login(user, psswd) VALUES (?,?);
 select:
-SELECT * FROM Login WHERE user = (?);
+SELECT * FROM Login WHERE user = ?;
