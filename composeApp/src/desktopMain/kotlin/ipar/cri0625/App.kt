@@ -70,13 +70,18 @@ fun App(sqlDriver: SqlDriver) {
 
     DisposableEffect(Unit) {
         CoroutineScope(Dispatchers.Default).launch {
-          //  val isValidUser = validateUser(databaseSqlite, user, psswd)
-            try {
-                val connectionString = "mongodb+srv://$user:$psswd@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
-                database = setupConnection(connectionString, "test")
-            } catch (me: MongoException) {
-                error = me.message
+           val isValidUser = validateUser(databaseSqlite, user, psswd)
+            if(isValidUser){
+                try {
+                    val connectionString = "mongodb+srv://$user:$psswd@prueba.7rxv1.mongodb.net/?retryWrites=true&w=majority&appName=Prueba"
+                    database = setupConnection(connectionString, "test")
+                } catch (me: MongoException) {
+                    error = me.message
+                }
+            }else{
+
             }
+
         }
         onDispose { }
     }
@@ -85,7 +90,9 @@ fun App(sqlDriver: SqlDriver) {
         NavHost(controller, startDestination = HomeRoute){
             composable<HomeRoute>{ HomeScreen(controller) }
             composable<Login>{LoginScreen(controller,databaseSqlite)}
-
+            composable<Adentro>{InsideScreen(controller,database!!)}
+            composable<AñadirURL>{UrlInsert(database!!, controller)}
+            composable<VerURL>{URlList(database!!)}
 
         }
 
@@ -99,6 +106,8 @@ suspend fun logout(db: Database){
 @Serializable
 object HomeRoute
 @Serializable
+object Adentro
+@Serializable
 object Login
 @Serializable
 object AñadirURL
@@ -108,6 +117,8 @@ object VerURL
 fun loginUser(db: Database){
     db.loginQueries.insert("nayrios2004", "Adri888")
 }
+
+//valida
 data class URL(
     @BsonId
     val id: ObjectId,
@@ -148,15 +159,25 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
      Button(onClick = {controller.navigate(Login)}){
           Text("ListarEspectaculos")
        }
-            Button(onClick = { controller.navigate(AñadirURL) }) {
-                Text("Insertar Producto")
-            }
-            Button(onClick = { controller.navigate(VerURL) }) {
-                Text("Ver Productos")
-            }
+
 
         }
     }
+
+@Composable
+fun InsideScreen(controller: NavController, database: MongoDatabase) {
+    Column {
+        Nav(controller)
+
+        Button(onClick = { controller.navigate(AñadirURL) }) {
+            Text("Insertar Producto")
+        }
+        Button(onClick = { controller.navigate(VerURL) }) {
+            Text("Ver Productos")
+        }
+
+    }
+}
 
 
 fun validateUser(database: Database, username: String, password: String): Boolean {
@@ -192,10 +213,11 @@ fun URlList(database: MongoDatabase) {
         }
     }
 }
-//
-@Composable
-fun ProductInsert(database: MongoDatabase) {
 
+//Que no este vacia
+@Composable
+fun UrlInsert(database: MongoDatabase, controller: NavController) {
+    Nav(controller)
     var insert by remember { mutableStateOf(false) }
     var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
 
@@ -229,6 +251,7 @@ fun ProductInsert(database: MongoDatabase) {
                 label = { Text("Name") },
                 placeholder = { Text("Product name") },)
         }
+        Button(onClick = { insert = true}) { Text("Insert") }
     }
 }
 @Composable
@@ -258,7 +281,7 @@ fun LoginScreen(controller: NavController, db: Database) {
         Button(
             onClick = {
                 if (validateUser(db, username, password)) {
-                   // controller.navigate(HomeRoute)
+                   controller.navigate(Adentro)
                 } else {
                     loginError = "Usuario o contraseña incorrectos"
                 }
