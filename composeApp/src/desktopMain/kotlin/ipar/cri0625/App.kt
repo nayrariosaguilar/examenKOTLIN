@@ -141,7 +141,7 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
         TopAppBar(
             title = { Text("Barra navegació") },
             actions = {
-                IconButton(onClick = { controller.navigate(HomeRoute) }) {
+                IconButton(onClick = { controller.navigate(Adentro) }) {
                     Icon(imageVector = Icons.Filled.Home, contentDescription = "Home")
                 }
             }
@@ -151,10 +151,9 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
     @Composable
     fun HomeScreen(controller: NavController) {
         Column {
-            Nav(controller)
-     Button(onClick = {controller.navigate(Login)}){
+            Button(onClick = {controller.navigate(Login)}){
           Text("Login APP urls")
-            }
+                }
 
         }
     }
