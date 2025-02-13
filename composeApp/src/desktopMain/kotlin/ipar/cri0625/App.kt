@@ -92,6 +92,8 @@ fun App(sqlDriver: SqlDriver) {
             composable<AñadirURL>{UrlInsert(database!!, controller)}
             composable<VerURL>{URlList(database!!,controller)}
             composable<borrarURL>{UrlDelete(database!!,controller)}
+            composable<updateURL>{UrlUpdate(database!!,controller)}
+            composable<borrarTODO>{UrlUpdate(database!!,controller)}
         }
 
     }
@@ -109,6 +111,10 @@ object AñadirURL
 object VerURL
 @Serializable
 object borrarURL
+@Serializable
+object updateURL
+@Serializable
+object borrarTODO
 
 
 
@@ -173,10 +179,13 @@ fun InsideScreen(controller: NavController, database: MongoDatabase, databaseSql
             Text("Ver URL's")
         }
         Button(onClick = { controller.navigate(borrarURL) }) {
-            Text("VBorraUrl")
+            Text(" Borra URL")
+        }
+        Button(onClick = { controller.navigate(updateURL) }) {
+            Text("Update URL")
         }
         Button(onClick = { salir = true }) {
-            Text("Deslogin")
+            Text("lOGOUT")
         }
         if(salir){
             AlertDialog(onDismissRequest = { salir = false },
@@ -322,7 +331,57 @@ fun UrlDelete(database: MongoDatabase, controller: NavController) {
         Button(onClick = { insert = true}) { Text("Delete") }
     }
 }
+//update
+@Composable
+fun UrlUpdate(database: MongoDatabase, controller: NavController) {
+    Nav(controller)
+    var updateBoolean by remember { mutableStateOf(false) }
+    var urlNueva: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
+    var urlAntigua: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
 
+
+    LaunchedEffect(updateBoolean) {
+        if (updateBoolean) {
+            val filter = Document("url", urlAntigua.url)
+            val update = Document("\$set", Document("url", urlNueva.url))
+            database.getCollection<URL>("Urls").updateOne(filter, update)
+            urlAntigua = URL(id = ObjectId(), url = "")
+            urlNueva = URL(id = ObjectId(), url = "")
+            updateBoolean = false
+        }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp)
+    ) {
+        if (updateBoolean) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = "URL",
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("NUEVA URL")
+            TextField(
+                value = urlNueva.url,
+                onValueChange = { urlNueva = urlNueva.copy(url = it) },
+                label = { Text("Name") },
+                placeholder = { Text("URL") },)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("ANTIGUA URL")
+            TextField(
+                value = urlAntigua.url,
+                onValueChange = { urlAntigua = urlAntigua.copy(url = it) },
+                label = { Text("Name") },
+                placeholder = { Text("URL") },)
+        }
+        Button(onClick = { updateBoolean = true}) { Text("Update") }
+    }
+}
 
 
 @Composable
