@@ -88,7 +88,7 @@ fun App(sqlDriver: SqlDriver) {
         NavHost(controller, startDestination = HomeRoute){
             composable<HomeRoute>{ HomeScreen(controller) }
             composable<Login>{LoginScreen(controller,databaseSqlite)}
-            composable<Adentro>{InsideScreen(controller,database!!)}
+            composable<Adentro>{InsideScreen(controller,database!!, databaseSqlite)}
             composable<AñadirURL>{UrlInsert(database!!, controller)}
             composable<VerURL>{URlList(database!!,controller)}
         }
@@ -108,8 +108,7 @@ object AñadirURL
 object VerURL
 @Serializable
 object borrarURL
-@Serializable
-object Deslogin
+
 
 
 fun loginUser(db: Database){
@@ -162,7 +161,8 @@ suspend fun setupConnection(connectionString: String, databaseName: String): Mon
 
 
 @Composable
-fun InsideScreen(controller: NavController, database: MongoDatabase) {
+fun InsideScreen(controller: NavController, database: MongoDatabase, databaseSqlite: Database) {
+    var salir by remember { mutableStateOf(false) }
     Column {
         Nav(controller)
 
@@ -172,9 +172,29 @@ fun InsideScreen(controller: NavController, database: MongoDatabase) {
         Button(onClick = { controller.navigate(VerURL) }) {
             Text("Ver URL's")
         }
-        Button(onClick = { controller.navigate(Deslogin) }) {
+        Button(onClick = { salir = true }) {
             Text("Deslogin")
         }
+        if(salir){
+            AlertDialog(onDismissRequest = { salir = false },
+                title = { Text("Salir") },
+                text = { Text("¿Estás seguro que quieres salir?") },
+                confirmButton = {
+                    Button(onClick = {
+                        salir = false
+                        databaseSqlite.loginQueries.deleted()
+                        controller.navigate(Login)
+                    }) {
+                        Text("Sí")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { salir = false }) {
+                        Text("No")
+                    }
+                })
+        }
+
         //BORRAR lo de la base de datos local, cuando compruebo al incio veo que no hay nada me lo permite
         //dejar datos por defecto en la interfaz
 
@@ -299,30 +319,6 @@ fun LoginScreen(controller: NavController, db: Database) {
         }
     }
 }
-//
-@Composable
-fun LogoutScreen(controller: NavController, database: Database) {
-    var dropBD by remember { mutableStateOf(false) }
-    var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
-    var loginError by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(dropBD) {
-        if (dropBD) {
-             dropBD = database.loginQueries.deleted()
-            url = URL(id = ObjectId(), url = "")
-            dropBD = false
-        }
-    }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize().padding(10.dp)
-    ) {
-        if (dropBD) {
-            CircularProgressIndicator()
-        }
-        Button(onClick = { dropBD = true}) { Text("Insert") }
-    }
-}
 
 
