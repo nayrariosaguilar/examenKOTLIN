@@ -91,6 +91,7 @@ fun App(sqlDriver: SqlDriver) {
             composable<Adentro>{InsideScreen(controller,database!!, databaseSqlite)}
             composable<AñadirURL>{UrlInsert(database!!, controller)}
             composable<VerURL>{URlList(database!!,controller)}
+            composable<borrarURL>{UrlDelete(database!!,controller)}
         }
 
     }
@@ -170,6 +171,9 @@ fun InsideScreen(controller: NavController, database: MongoDatabase, databaseSql
         }
         Button(onClick = { controller.navigate(VerURL) }) {
             Text("Ver URL's")
+        }
+        Button(onClick = { controller.navigate(borrarURL) }) {
+            Text("VBorraUrl")
         }
         Button(onClick = { salir = true }) {
             Text("Deslogin")
@@ -278,6 +282,48 @@ fun UrlInsert(database: MongoDatabase, controller: NavController) {
         Button(onClick = { insert = true}) { Text("Insert") }
     }
 }
+//Que no este vacia
+@Composable
+fun UrlDelete(database: MongoDatabase, controller: NavController) {
+    Nav(controller)
+    var insert by remember { mutableStateOf(false) }
+    var url: URL by remember { mutableStateOf(URL(id = ObjectId(), url = "")) }
+
+
+    LaunchedEffect(insert) {
+        if (insert) {
+            val filter = Document("url", url.url)
+            database.getCollection<URL>("Urls").deleteOne(filter)
+            url = URL(id = ObjectId(), url = "")
+            insert = false
+        }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp)
+    ) {
+        if (insert) {
+            CircularProgressIndicator()
+        } else {
+            Text(
+                text = "URL",
+                style = MaterialTheme.typography.h3,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            TextField(
+                value = url.url,
+                onValueChange = { url = url.copy(url = it) },
+                label = { Text("Name") },
+                placeholder = { Text("URL") },)
+        }
+        Button(onClick = { insert = true}) { Text("Delete") }
+    }
+}
+
+
 
 @Composable
 fun LoginScreen(controller: NavController, db: Database) {
