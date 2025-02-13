@@ -220,10 +220,13 @@ fun URlList(database: MongoDatabase,controller: NavController) {
             isLoading = false
         }
     }
-    Column {
 
-        Text("URLS")
-        //Spacer(modifier = Modifier.height(20.dp))
+    Column (horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp)){
+        Spacer(modifier = Modifier.height(20.dp))
+        Text("URLS LECTOR DE RSS")
+        Spacer(modifier = Modifier.height(20.dp))
         if (isLoading) {
             CircularProgressIndicator()
         } else {
